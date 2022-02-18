@@ -1,0 +1,5 @@
+# definitive config file if present
+*secret.yaml
+.key
+.venv
+

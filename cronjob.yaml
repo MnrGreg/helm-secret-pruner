@@ -1,0 +1,41 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: helmsecretpruner
+  name: helmsecretpruner
+  namespace: ${NAMESPACE}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 60000
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - command: ["python", "/app/server.py"]
+            env:
+            - name: DRYRUN
+              value: "TRUE"
+            - name: LABEL_SELECTOR
+              value: "businessunit"
+            image: docker.io/mrgregmay/helmsecretpruner:v0.0.1
+            imagePullPolicy: IfNotPresent
+            name: helmsecretpruner
+            resources:
+              limits:
+                cpu: 200m
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsGroup: 65534
+              runAsUser: 65534
+  schedule: 00 10 1 * *
+  successfulJobsHistoryLimit: 1
+  suspend: false
